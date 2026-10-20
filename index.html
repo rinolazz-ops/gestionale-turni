@@ -1,0 +1,4255 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestione Turni ACTV – Extraurbano Sud</title>
+<style>
+:root{
+  --primo:#f59e0b; --spezzato:#10b981; --secondo:#3b82f6; --terzo:#8b5cf6;
+  --ridotto:#94a3b8; --disp:#d1d5db; --allarme:#dc2626; --deroga:#d97706;
+  --bg:#f4f6f8; --panel:#ffffff; --line:#e3e8ee; --txt:#1f2937; --muted:#6b7280;
+}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+     background:var(--bg);color:var(--txt)}
+header{background:#123c5c;color:#fff;padding:18px 24px}
+header h1{margin:0;font-size:20px;font-weight:600}
+header p{margin:4px 0 0;font-size:13px;opacity:.85}
+main{max-width:1320px;margin:0 auto;padding:18px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+        padding:16px 18px;margin-bottom:16px}
+h2{margin:0 0 12px;font-size:16px;font-weight:600;color:#123c5c}
+h3{margin:16px 0 8px;font-size:14px;font-weight:600;color:#123c5c}
+.cards{display:flex;flex-wrap:wrap;gap:10px}
+.card{flex:1 1 150px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.card .val{font-size:22px;font-weight:700}
+.card .lbl{font-size:12px;color:var(--muted)}
+.card.sel{border-color:#123c5c;box-shadow:0 0 0 1px #123c5c inset}
+button{background:#123c5c;color:#fff;border:0;border-radius:7px;padding:8px 14px;
+       font-size:14px;cursor:pointer}
+button:hover{background:#1a5480}
+button.secondario{background:#eef2f6;color:#123c5c;border:1px solid var(--line)}
+button.secondario:hover{background:#e2e9f0}
+button.verde{background:#0f766e}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tabs button{background:#eef2f6;color:#123c5c;border:1px solid var(--line)}
+.tabs button.attivo{background:#123c5c;color:#fff;border-color:#123c5c}
+input,select{font:inherit;padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.righe{display:flex;flex-wrap:wrap;gap:14px;align-items:end}
+.campo{display:flex;flex-direction:column;gap:3px}
+.campo span{font-size:12px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.strip{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px}
+.blk{width:28px;height:28px;border-radius:5px;font-size:10px;display:flex;align-items:center;
+     justify-content:center;color:#fff;font-weight:600;position:relative}
+.blk.disp{background:repeating-linear-gradient(45deg,#e5e7eb,#e5e7eb 4px,#cbd5e1 4px,#cbd5e1 8px);color:#475569}
+.PRIMO{background:var(--primo)} .SPEZZATO{background:var(--spezzato)}
+.SECONDO{background:var(--secondo)} .TERZO{background:var(--terzo)}
+.RIDOTTO{background:var(--ridotto)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+th{background:#f8fafc;font-weight:600}
+tr:nth-child(even) td{background:#fcfdfe}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;color:#fff;font-size:11px;font-weight:600}
+.scroll{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.stat-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.stat{flex:1 1 130px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#f8fafc}
+.stat b{display:block;font-size:18px}
+.stat .lbl{font-size:11px;color:var(--muted)}
+.migliora{color:#15803d;font-weight:600} .peggiora{color:#b91c1c;font-weight:600}
+.cal{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.cal .c{width:64px;border-radius:6px;color:#fff;font-size:10px;padding:4px 3px;text-align:center}
+.cal .c small{display:block;opacity:.9;font-size:9px}
+.cal .c.ko{outline:2px solid var(--allarme)}
+.cal .c.der{outline:2px solid var(--deroga)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.mie{cursor:pointer}
+details summary{cursor:pointer;font-weight:600;color:#123c5c;font-size:14px;margin-bottom:8px}
+.flex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ko-txt{color:var(--allarme);font-weight:600} .der-txt{color:var(--deroga);font-weight:600}
+@media print{body{background:#fff} header{background:#fff;color:#000} .noprint{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Gestione Turni – ACTV Extraurbano Sud</h1>
+  <p>Riordinamento della numerazione dei turni, deposito per deposito, per evitare settimane
+     consecutive della stessa tipologia e per rispettare la pausa minima di riposo tra un turno e l’altro.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>1 · Riepilogo</h2>
+  <div class="cards" id="riepilogo"></div>
+  <div class="note" id="infoDati"></div>
+  <div class="legend">
+    <span><i class="PRIMO"></i>Primo (mattina)</span>
+    <span><i class="SPEZZATO"></i>Spezzato</span>
+    <span><i class="SECONDO"></i>Secondo</span>
+    <span><i class="TERZO"></i>Terzo</span>
+    <span><i class="disp"></i>Disponibile (turno da assegnare)</span>
+    <span><i class="RIDOTTO"></i>Jolly (fuori turnazione)</span>
+  </div>
+  <div class="tabs noprint" id="tabs" style="margin-top:12px"></div>
+</section>
+
+<section>
+  <h2>2 · Regole e pesi <span id="titoloDep" style="font-weight:400;color:var(--muted)"></span></h2>
+  <details open>
+    <summary>Classificazione dei turni (soglie di questo deposito)</summary>
+    <div class="righe">
+      <label class="campo"><span>Ridotto/jolly sotto (ore)</span><input type="number" id="s_ridotto" step="0.25" min="0" max="8"></label>
+      <label class="campo"><span>Primo parte prima delle</span><input type="time" id="s_fineprimo"></label>
+      <label class="campo"><span>…e finisce entro</span><input type="time" id="s_maxprimo"></label>
+      <label class="campo"><span>Terzo parte dalle</span><input type="time" id="s_inizioterzo"></label>
+      <label class="campo"><span>…oppure finisce dopo</span><input type="time" id="s_fineterzo"></label>
+      <button class="secondario" onclick="applicaSoglie()">Ricalcola questo deposito</button>
+      <button class="secondario" onclick="copiaSoglieATutti()">…e applica a tutti</button>
+    </div>
+    <div class="note">Due tratti orari = automaticamente <b>spezzato</b>. Uno spezzato si considera
+      una <b>mattina</b>: dopo uno spezzato meglio un secondo o un terzo, non un primo.
+      I turni sotto la soglia ore diventano <b>jolly</b> e non entrano nella turnazione.</div>
+  </details>
+  <details open style="margin-top:10px">
+    <summary>Pesi della sequenza (quanto evitare ogni successione)</summary>
+    <div class="righe">
+      <label class="campo"><span>Stesso turno ripetuto</span><input type="number" id="p_rip" min="0" step="5"></label>
+      <label class="campo"><span>Primo poi spezzato (stessa fascia)</span><input type="number" id="p_fascia" min="0" step="5"></label>
+      <label class="campo"><span>Spezzato poi primo (mattina su mattina)</span><input type="number" id="p_spezzmat" min="0" step="5"></label>
+      <label class="campo"><span>Inversione (secondo→primo, terzo→secondo)</span><input type="number" id="p_inv" min="0" step="5"></label>
+      <label class="campo"><span>Salto (primo→terzo)</span><input type="number" id="p_salto" min="0" step="5"></label>
+      <label class="campo"><span>Ciclo (terzo→primo)</span><input type="number" id="p_ciclo" min="0" step="5"></label>
+      <label class="campo"><span>Disponibile a meno di 4 turni di distanza (per ogni turno mancante)</span><input type="number" id="p_disp" min="0" step="5"></label>
+    </div>
+    <div class="righe" style="margin-top:10px">
+      <label class="campo"><span>Pausa sotto 9h40</span><input type="number" id="p_pausako" min="0" step="10"></label>
+      <label class="campo"><span>Pausa tra 9h40 e 10h (con deroga)</span><input type="number" id="p_pausader" min="0" step="5"></label>
+      <label class="campo"><span>Settimane “disponibile”</span>
+        <select id="sel_disp">
+          <option value="auto">automatico: liberi solo se non rispettano la regola</option>
+          <option value="sempre">fissi alla posizione attuale</option>
+          <option value="mai">sempre liberi di spostarsi</option>
+        </select></label>
+    </div>
+    <div class="note">Regola dei disponibili: tra un turno “disponibile” e l’attivale devono passare,
+      se possibile, <b>almeno 4 turni normali</b>, così l’ufficio non si trova due turni da assegnare
+      a poche settimane di distanza. In modalità <b>automatico</b> i numeri disponibile restano dove
+      sono oggi se già rispettano la regola (Dolo, Cavarzere, Fossò) e vengono riequilibrati solo se
+      non la rispettano (Bojon); dove è matematicamente impossibile (Padova: 4 disponibili su 12
+      posizioni) si segnala e basta.</div>
+    <div class="righe noprint" style="margin-top:12px">
+      <button class="verde" onclick="ottimizza(false)">⚡ Calcola questo deposito</button>
+      <button class="secondario" onclick="ottimizza(true)">Calcola tutti i depositi</button>
+      <button class="secondario" onclick="azzera()">Ripristina numerazione attuale</button>
+    </div>
+  </details>
+</section>
+
+<section>
+  <h2>3 · Numerazione proposta <span id="titoloDep2" style="font-weight:400;color:var(--muted)"></span></h2>
+  <div class="stat-grid" id="stats"></div>
+  <div class="strip" id="strip"></div>
+  <div class="note" id="notaSeq"></div>
+  <div class="note ko-txt" id="msgDisp" style="margin-top:4px"></div>
+  <div class="flex noprint" style="margin-top:10px">
+    <button class="secondario" onclick="scaricaCSV()">⬇ Scarica proposta (CSV, tutti i depositi)</button>
+    <button class="secondario" onclick="window.print()">🖨 Stampa</button>
+  </div>
+  <div class="scroll" style="margin-top:10px;max-height:520px">
+    <table id="tabSeq"><thead><tr>
+      <th>Nuovo n°</th><th>Turno attuale</th><th>Categoria</th>
+      <th>Pausa per il turno dopo</th><th>Lun-Ven</th><th>Sabato</th><th>Festivo</th><th>Ore</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</section>
+
+<section>
+  <h2>4 · Simulazione settimana per settimana</h2>
+  <div class="righe">
+    <label class="campo"><span>Si parte dal turno n°</span><input type="number" id="sim_partenza" min="1" value="1"></label>
+    <label class="campo"><span>Quante settimane</span>
+      <select id="sim_settimane"><option>13</option><option selected>26</option><option>52</option></select></label>
+    <button onclick="disegnaSimulazione()">Mostra</button>
+  </div>
+  <div class="note">Il turno cambia ogni settimana in ordine crescente; arrivato all’ultimo si
+    ricomincia dal n° 1. La pausa riportata è quella tra la fine dell’ultimo servizio della settimana
+    precedente (sabato o festivo, se presenti) e l’inizio del turno nuovo: deve essere di almeno
+    <b>10 ore</b>, con deroga a <b>9h40</b>. Nelle settimane “disponibile” il turno lo assegna
+    l’ufficio: la pausa non è verificabile qui e la catena del controllo si ferma.</div>
+  <div class="cal" id="calendario"></div>
+  <div class="scroll" style="margin-top:10px">
+    <table id="tabSim"><thead><tr>
+      <th>Sett.</th><th>Nuovo n°</th><th>Categoria</th><th>Turno attuale</th>
+      <th>Orario Lun-Ven</th><th>Pausa</th><th>Note</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</section>
+
+<section>
+  <h2>5 · Turni di questo deposito</h2>
+  <div class="righe">
+    <label class="campo"><span>Cerca</span><input type="search" id="f_ricerca" placeholder="numero, orario…" oninput="disegnaTurni()"></label>
+    <label class="campo"><span>Filtro categoria</span>
+      <select id="f_cat" onchange="disegnaTurni()">
+        <option value="">tutte</option><option>PRIMO</option><option>SPEZZATO</option>
+        <option>SECONDO</option><option>TERZO</option>
+      </select></label>
+    <span class="note">Clicca su una categoria per cambiarla (ogni clic passa alla successiva:
+      primo → spezzato → secondo → terzo → primo).</span>
+  </div>
+  <div class="scroll" style="margin-top:8px">
+    <table id="tabTurni"><thead><tr>
+      <th>n°</th><th>Categoria</th><th>Lun-Ven</th><th>Sabato</th>
+      <th>Festivo</th><th>Pausa interna</th><th>Ore</th><th>Note</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</section>
+
+<section>
+  <h2>6 · Jolly (turni brevi, fuori dalla turnazione)</h2>
+  <div class="note">Questi turni non rientrano nella rotazione: è l’ufficio turni a assegnarli nei
+    giorni disponibili. Restano quindi esclusi dal conteggio delle posizioni.</div>
+  <table id="tabJolly" style="margin-top:8px"><thead><tr>
+    <th>n°</th><th>Lun-Ven</th><th>Sabato</th><th>Festivo</th><th>Ore</th>
+  </tr></thead><tbody></tbody></table>
+</section>
+
+<section>
+  <h2>7 · Controlli pause interne <span id="titoloDep3" style="font-weight:400;color:var(--muted)"></span></h2>
+  <div class="note">Pause interne al singolo turno (lun-ven → sabato oppure sabato → festivo):
+    non si possono correggere riordinando, quindi vanno solo segnalate all’ufficio turni.
+    <span class="der-txt">Tra 9h40 e 10h</span> si accetta con deroga,
+    <span class="ko-txt">sotto le 9h40</span> è un problema: tra 10 e 12 ore la pausa c’è ma è stretta.</div>
+  <table id="tabPause" style="margin-top:8px"><thead><tr>
+    <th>n°</th><th>Tra</th><th>Fine turno prima</th><th>Inizio turno dopo</th><th>Pausa</th>
+  </tr></thead><tbody></tbody></table>
+</section>
+
+</main>
+
+<footer style="max-width:1320px;margin:0 auto;padding:0 18px 24px" class="note">
+  Dati generati da <b>estrai_turni.py</b> a partire dai PDF cartellini. Per aggiornare: estrai i PDF
+  della nuova settimana, lancia lo script, poi riapri questa pagina.
+</footer>
+
+<script id="dati" type="application/json">
+/*==DATI_INIZIO==*/
+{
+ "generato": "2026-10-20",
+ "soglie": {
+  "ore_ridotto": 4.0,
+  "fine_primo": 660,
+  "max_primo": 840,
+  "inizio_terzo": 840,
+  "fine_terzo": 1260
+ },
+ "sorgenti": [
+  "✅ 2026-09-13-FESTIVO-TURNI-ES.pdf",
+  "✅️ 2026-10-01-LUN_VEN-TURNI-ES.pdf",
+  "✅️ 2026-10-03-SABATO-TURNI-ES.pdf"
+ ],
+ "depositi": [
+  {
+   "codice": "dolo",
+   "nome": "Dolo",
+   "sigla": "DEP.DOLO / DOLO.DEP",
+   "fasce": [
+    [
+     1,
+     54
+    ]
+   ],
+   "disponibili": [
+    6,
+    11,
+    16,
+    21,
+    26,
+    35,
+    40,
+    45,
+    50
+   ],
+   "turni": [
+    {
+     "n": 1,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 6.08,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.08,
+      "tratti": [
+       [
+        "16:40",
+        "22:48"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.28,
+      "tratti": [
+       [
+        "17:30",
+        "00:58"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 7.3,
+      "tratti": [
+       [
+        "16:25",
+        "23:55"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 2,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 7.28,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.28,
+      "tratti": [
+       [
+        "14:02",
+        "21:30"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.57,
+      "tratti": [
+       [
+        "11:58",
+        "18:55"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 7.18,
+      "tratti": [
+       [
+        "15:12",
+        "22:30"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 3,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.16,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.16,
+      "tratti": [
+       [
+        "07:00",
+        "09:30"
+       ],
+       [
+        "14:02",
+        "18:48"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.27,
+      "tratti": [
+       [
+        "06:50",
+        "09:45"
+       ],
+       [
+        "15:13",
+        "18:45"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 4,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 5.35,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 5.35,
+      "tratti": [
+       [
+        "04:15",
+        "09:50"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.38,
+      "tratti": [
+       [
+        "04:15",
+        "10:53"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 5,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.28,
+     "monta": "DOLO.DEP",
+     "lv": {
+      "ore": 6.28,
+      "tratti": [
+       [
+        "05:58",
+        "09:28"
+       ],
+       [
+        "12:35",
+        "15:33"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.25,
+      "tratti": [
+       [
+        "05:00",
+        "08:58"
+       ],
+       [
+        "11:58",
+        "15:25"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 7,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.11,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.11,
+      "tratti": [
+       [
+        "13:17",
+        "20:28"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.35,
+      "tratti": [
+       [
+        "14:15",
+        "20:50"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 7.31,
+      "tratti": [
+       [
+        "12:15",
+        "19:46"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 8,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 5.49,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 5.49,
+      "tratti": [
+       [
+        "06:39",
+        "09:08"
+       ],
+       [
+        "12:05",
+        "15:25"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 9,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.29,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.29,
+      "tratti": [
+       [
+        "06:43",
+        "14:12"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.17,
+      "tratti": [
+       [
+        "05:28",
+        "12:45"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 10,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.19,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.19,
+      "tratti": [
+       [
+        "06:10",
+        "08:32"
+       ],
+       [
+        "11:53",
+        "15:50"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.13,
+      "tratti": [
+       [
+        "05:02",
+        "08:13"
+       ],
+       [
+        "12:15",
+        "16:17"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 12,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 6.47,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.47,
+      "tratti": [
+       [
+        "17:00",
+        "23:47"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.47,
+      "tratti": [
+       [
+        "17:00",
+        "23:47"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.47,
+      "tratti": [
+       [
+        "17:00",
+        "23:47"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 13,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 7.27,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.27,
+      "tratti": [
+       [
+        "13:45",
+        "21:12"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.33,
+      "tratti": [
+       [
+        "16:22",
+        "23:55"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 14,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.33,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.33,
+      "tratti": [
+       [
+        "07:05",
+        "09:05"
+       ],
+       [
+        "13:02",
+        "18:35"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 15,
+     "cat": "PRIMO",
+     "origine": "sabato",
+     "ore": 7.08,
+     "monta": "DEP.DOLO",
+     "lv": null,
+     "sb": {
+      "ore": 7.08,
+      "tratti": [
+       [
+        "06:12",
+        "13:20"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.2,
+      "tratti": [
+       [
+        "06:15",
+        "12:35"
+       ]
+      ]
+     },
+     "deposito": "dolo",
+     "nota": "nessun turno lun-ven: da sabato"
+    },
+    {
+     "n": 17,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 7.23,
+     "monta": "DOLO.DEP",
+     "lv": {
+      "ore": 7.23,
+      "tratti": [
+       [
+        "16:02",
+        "23:25"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.58,
+      "tratti": [
+       [
+        "17:05",
+        "00:03"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 7.23,
+      "tratti": [
+       [
+        "15:25",
+        "22:48"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 18,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.0,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.0,
+      "tratti": [
+       [
+        "13:30",
+        "20:30"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 19,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.12,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.12,
+      "tratti": [
+       [
+        "06:33",
+        "08:48"
+       ],
+       [
+        "11:58",
+        "15:55"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 20,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 7.11,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.11,
+      "tratti": [
+       [
+        "05:02",
+        "12:13"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.25,
+      "tratti": [
+       [
+        "06:10",
+        "13:35"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.45,
+      "tratti": [
+       [
+        "06:52",
+        "13:37"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 22,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 7.26,
+     "monta": "DOLO.DEP",
+     "lv": {
+      "ore": 7.26,
+      "tratti": [
+       [
+        "14:42",
+        "22:08"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.35,
+      "tratti": [
+       [
+        "12:02",
+        "19:37"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.44,
+      "tratti": [
+       [
+        "16:51",
+        "23:35"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 23,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.15,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.15,
+      "tratti": [
+       [
+        "13:02",
+        "20:17"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 5.45,
+      "tratti": [
+       [
+        "11:40",
+        "17:25"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 24,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.42,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.42,
+      "tratti": [
+       [
+        "06:40",
+        "09:05"
+       ],
+       [
+        "14:23",
+        "18:40"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 25,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.17,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.17,
+      "tratti": [
+       [
+        "05:22",
+        "08:07"
+       ],
+       [
+        "12:05",
+        "15:37"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.25,
+      "tratti": [
+       [
+        "06:20",
+        "10:20"
+       ],
+       [
+        "12:25",
+        "15:50"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 27,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 7.3,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.3,
+      "tratti": [
+       [
+        "17:35",
+        "01:05"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.17,
+      "tratti": [
+       [
+        "17:43",
+        "01:00"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.13,
+      "tratti": [
+       [
+        "18:52",
+        "01:05"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 28,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 6.45,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.45,
+      "tratti": [
+       [
+        "14:15",
+        "21:00"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 29,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.44,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.44,
+      "tratti": [
+       [
+        "06:05",
+        "08:15"
+       ],
+       [
+        "12:23",
+        "16:57"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.47,
+      "tratti": [
+       [
+        "06:40",
+        "09:25"
+       ],
+       [
+        "13:45",
+        "17:47"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 30,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.11,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.11,
+      "tratti": [
+       [
+        "06:00",
+        "08:15"
+       ],
+       [
+        "11:33",
+        "15:29"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.17,
+      "tratti": [
+       [
+        "06:10",
+        "13:27"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 7.23,
+      "tratti": [
+       [
+        "10:43",
+        "18:06"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 31,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 7.08,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.08,
+      "tratti": [
+       [
+        "06:27",
+        "13:35"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.33,
+      "tratti": [
+       [
+        "06:27",
+        "13:00"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 32,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 5.55,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 5.55,
+      "tratti": [
+       [
+        "06:07",
+        "08:52"
+       ],
+       [
+        "11:40",
+        "14:50"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 33,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.19,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.19,
+      "tratti": [
+       [
+        "06:03",
+        "10:44"
+       ],
+       [
+        "13:12",
+        "15:50"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.51,
+      "tratti": [
+       [
+        "06:38",
+        "09:10"
+       ],
+       [
+        "11:53",
+        "16:12"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 34,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 6.47,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.47,
+      "tratti": [
+       [
+        "04:00",
+        "10:47"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.47,
+      "tratti": [
+       [
+        "04:00",
+        "10:47"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.47,
+      "tratti": [
+       [
+        "04:00",
+        "10:47"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 36,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.3,
+     "monta": "DOLO.DEP",
+     "lv": {
+      "ore": 7.3,
+      "tratti": [
+       [
+        "12:42",
+        "20:12"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 37,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.36,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.36,
+      "tratti": [
+       [
+        "06:10",
+        "09:20"
+       ],
+       [
+        "12:02",
+        "15:28"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.32,
+      "tratti": [
+       [
+        "06:00",
+        "08:27"
+       ],
+       [
+        "12:35",
+        "17:40"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 38,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 6.28,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.28,
+      "tratti": [
+       [
+        "06:57",
+        "13:25"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.0,
+      "tratti": [
+       [
+        "06:20",
+        "13:20"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.48,
+      "tratti": [
+       [
+        "07:58",
+        "14:46"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 39,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.3,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.3,
+      "tratti": [
+       [
+        "05:55",
+        "10:03"
+       ],
+       [
+        "12:30",
+        "15:52"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.3,
+      "tratti": [
+       [
+        "06:40",
+        "09:07"
+       ],
+       [
+        "13:37",
+        "18:40"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 41,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.06,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.06,
+      "tratti": [
+       [
+        "06:38",
+        "10:10"
+       ],
+       [
+        "12:15",
+        "15:49"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.08,
+      "tratti": [
+       [
+        "06:03",
+        "09:15"
+       ],
+       [
+        "11:33",
+        "15:29"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 42,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.28,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.28,
+      "tratti": [
+       [
+        "06:10",
+        "10:05"
+       ],
+       [
+        "12:30",
+        "15:03"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.0,
+      "tratti": [
+       [
+        "05:45",
+        "09:30"
+       ],
+       [
+        "12:33",
+        "15:48"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 43,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 5.28,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 5.28,
+      "tratti": [
+       [
+        "03:45",
+        "09:13"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.0,
+      "tratti": [
+       [
+        "03:45",
+        "09:45"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 5.28,
+      "tratti": [
+       [
+        "03:45",
+        "09:13"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 44,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 5.58,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 5.58,
+      "tratti": [
+       [
+        "05:45",
+        "08:28"
+       ],
+       [
+        "12:15",
+        "15:30"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.28,
+      "tratti": [
+       [
+        "05:22",
+        "10:00"
+       ],
+       [
+        "12:20",
+        "15:10"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 46,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 7.25,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.25,
+      "tratti": [
+       [
+        "16:30",
+        "23:55"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.32,
+      "tratti": [
+       [
+        "15:58",
+        "22:30"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.33,
+      "tratti": [
+       [
+        "16:52",
+        "23:25"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 47,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 6.47,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.47,
+      "tratti": [
+       [
+        "10:30",
+        "17:17"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.47,
+      "tratti": [
+       [
+        "10:30",
+        "17:17"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.47,
+      "tratti": [
+       [
+        "10:30",
+        "17:17"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 48,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.22,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.22,
+      "tratti": [
+       [
+        "06:40",
+        "09:38"
+       ],
+       [
+        "12:28",
+        "15:52"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.05,
+      "tratti": [
+       [
+        "06:32",
+        "09:10"
+       ],
+       [
+        "13:23",
+        "17:50"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 49,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.5,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.5,
+      "tratti": [
+       [
+        "06:12",
+        "08:57"
+       ],
+       [
+        "11:55",
+        "16:00"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.13,
+      "tratti": [
+       [
+        "05:58",
+        "09:28"
+       ],
+       [
+        "11:28",
+        "15:11"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 51,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.23,
+     "monta": "DOLO.DEP",
+     "lv": {
+      "ore": 7.23,
+      "tratti": [
+       [
+        "13:22",
+        "20:45"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.05,
+      "tratti": [
+       [
+        "12:30",
+        "19:35"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 7.35,
+      "tratti": [
+       [
+        "12:31",
+        "20:06"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 52,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.12,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 6.12,
+      "tratti": [
+       [
+        "07:00",
+        "09:10"
+       ],
+       [
+        "13:35",
+        "17:37"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "dolo"
+    },
+    {
+     "n": 53,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 7.15,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.15,
+      "tratti": [
+       [
+        "06:40",
+        "13:55"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.33,
+      "tratti": [
+       [
+        "06:07",
+        "13:40"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.56,
+      "tratti": [
+       [
+        "08:31",
+        "15:27"
+       ]
+      ]
+     },
+     "deposito": "dolo"
+    },
+    {
+     "n": 54,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.34,
+     "monta": "DEP.DOLO",
+     "lv": {
+      "ore": 7.34,
+      "tratti": [
+       [
+        "06:28",
+        "09:17"
+       ],
+       [
+        "13:40",
+        "18:25"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "dolo"
+    }
+   ]
+  },
+  {
+   "codice": "cavarzere",
+   "nome": "Cavarzere",
+   "sigla": "DEP.CAV",
+   "fasce": [
+    [
+     101,
+     130
+    ]
+   ],
+   "disponibili": [
+    102,
+    109,
+    119,
+    126
+   ],
+   "turni": [
+    {
+     "n": 101,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.52,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 6.52,
+      "tratti": [
+       [
+        "05:35",
+        "08:30"
+       ],
+       [
+        "11:40",
+        "15:37"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.28,
+      "tratti": [
+       [
+        "05:22",
+        "08:47"
+       ],
+       [
+        "12:07",
+        "16:10"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 103,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.48,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 6.48,
+      "tratti": [
+       [
+        "06:37",
+        "09:30"
+       ],
+       [
+        "12:17",
+        "16:12"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.52,
+      "tratti": [
+       [
+        "06:25",
+        "09:22"
+       ],
+       [
+        "12:17",
+        "16:12"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 104,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 6.58,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 6.58,
+      "tratti": [
+       [
+        "05:07",
+        "12:05"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 105,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.12,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.12,
+      "tratti": [
+       [
+        "06:20",
+        "09:47"
+       ],
+       [
+        "13:02",
+        "16:47"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.32,
+      "tratti": [
+       [
+        "07:05",
+        "14:37"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 106,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.43,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 6.43,
+      "tratti": [
+       [
+        "05:58",
+        "10:18"
+       ],
+       [
+        "12:52",
+        "15:15"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 107,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.3,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.3,
+      "tratti": [
+       [
+        "05:53",
+        "10:08"
+       ],
+       [
+        "12:10",
+        "15:25"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.22,
+      "tratti": [
+       [
+        "06:30",
+        "08:54"
+       ],
+       [
+        "11:19",
+        "16:17"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 108,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 5.15,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 5.15,
+      "tratti": [
+       [
+        "03:40",
+        "08:55"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 5.32,
+      "tratti": [
+       [
+        "03:40",
+        "09:12"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 110,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 6.1,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 6.1,
+      "tratti": [
+       [
+        "13:15",
+        "19:25"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 111,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.44,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 6.44,
+      "tratti": [
+       [
+        "05:33",
+        "09:27"
+       ],
+       [
+        "11:47",
+        "14:37"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.24,
+      "tratti": [
+       [
+        "05:35",
+        "08:54"
+       ],
+       [
+        "11:42",
+        "15:47"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 112,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.35,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 6.35,
+      "tratti": [
+       [
+        "06:30",
+        "09:00"
+       ],
+       [
+        "11:42",
+        "15:47"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 113,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 7.12,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.12,
+      "tratti": [
+       [
+        "04:52",
+        "12:04"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.2,
+      "tratti": [
+       [
+        "05:00",
+        "09:20"
+       ],
+       [
+        "11:30",
+        "14:30"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 114,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.22,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.22,
+      "tratti": [
+       [
+        "06:37",
+        "08:47"
+       ],
+       [
+        "12:55",
+        "18:07"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.17,
+      "tratti": [
+       [
+        "05:15",
+        "09:55"
+       ],
+       [
+        "12:45",
+        "15:22"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 115,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 5.32,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 5.32,
+      "tratti": [
+       [
+        "05:35",
+        "11:07"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.54,
+      "tratti": [
+       [
+        "06:20",
+        "09:47"
+       ],
+       [
+        "13:20",
+        "16:47"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 116,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.15,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.15,
+      "tratti": [
+       [
+        "05:22",
+        "09:13"
+       ],
+       [
+        "11:40",
+        "15:04"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 117,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.17,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.17,
+      "tratti": [
+       [
+        "12:37",
+        "19:54"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 118,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.3,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.3,
+      "tratti": [
+       [
+        "06:30",
+        "08:54"
+       ],
+       [
+        "13:20",
+        "18:26"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 5.58,
+      "tratti": [
+       [
+        "06:30",
+        "09:42"
+       ],
+       [
+        "11:47",
+        "14:33"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 120,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.54,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 6.54,
+      "tratti": [
+       [
+        "05:00",
+        "08:52"
+       ],
+       [
+        "11:30",
+        "14:32"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.31,
+      "tratti": [
+       [
+        "05:00",
+        "10:18"
+       ],
+       [
+        "12:47",
+        "15:00"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 121,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 6.42,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 6.42,
+      "tratti": [
+       [
+        "04:00",
+        "10:42"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 5.23,
+      "tratti": [
+       [
+        "03:40",
+        "09:03"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 122,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.01,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.01,
+      "tratti": [
+       [
+        "06:07",
+        "09:40"
+       ],
+       [
+        "13:12",
+        "16:40"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 123,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 6.18,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 6.18,
+      "tratti": [
+       [
+        "17:52",
+        "00:10"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.18,
+      "tratti": [
+       [
+        "17:52",
+        "00:10"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 124,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.35,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.35,
+      "tratti": [
+       [
+        "13:00",
+        "20:35"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.27,
+      "tratti": [
+       [
+        "12:27",
+        "19:54"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 125,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.3,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 6.3,
+      "tratti": [
+       [
+        "07:05",
+        "10:02"
+       ],
+       [
+        "15:32",
+        "19:05"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.44,
+      "tratti": [
+       [
+        "06:37",
+        "08:47"
+       ],
+       [
+        "13:58",
+        "18:32"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 127,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.07,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.07,
+      "tratti": [
+       [
+        "12:27",
+        "19:34"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.19,
+      "tratti": [
+       [
+        "13:15",
+        "20:34"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 128,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.09,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.09,
+      "tratti": [
+       [
+        "05:35",
+        "08:19"
+       ],
+       [
+        "11:45",
+        "16:10"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 129,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 5.33,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 5.33,
+      "tratti": [
+       [
+        "05:22",
+        "10:55"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.5,
+      "tratti": [
+       [
+        "06:10",
+        "09:03"
+       ],
+       [
+        "11:40",
+        "15:37"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    },
+    {
+     "n": 130,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.28,
+     "monta": "DEP.CAV",
+     "lv": {
+      "ore": 7.28,
+      "tratti": [
+       [
+        "06:40",
+        "09:10"
+       ],
+       [
+        "11:19",
+        "16:17"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.23,
+      "tratti": [
+       [
+        "06:37",
+        "08:55"
+       ],
+       [
+        "11:35",
+        "16:40"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "cavarzere"
+    }
+   ]
+  },
+  {
+   "codice": "bojon",
+   "nome": "Bojon",
+   "sigla": "BOJON PK",
+   "fasce": [
+    [
+     201,
+     225
+    ]
+   ],
+   "disponibili": [
+    205,
+    208,
+    213,
+    218
+   ],
+   "turni": [
+    {
+     "n": 201,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 5.31,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 5.31,
+      "tratti": [
+       [
+        "06:06",
+        "09:37"
+       ],
+       [
+        "12:37",
+        "14:37"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 202,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 7.22,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 7.22,
+      "tratti": [
+       [
+        "13:48",
+        "21:10"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.12,
+      "tratti": [
+       [
+        "13:32",
+        "20:44"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 203,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 6.31,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.31,
+      "tratti": [
+       [
+        "07:08",
+        "13:39"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.1,
+      "tratti": [
+       [
+        "05:55",
+        "13:05"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 204,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.17,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.17,
+      "tratti": [
+       [
+        "05:28",
+        "08:54"
+       ],
+       [
+        "12:53",
+        "15:44"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 206,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.02,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.02,
+      "tratti": [
+       [
+        "06:25",
+        "08:50"
+       ],
+       [
+        "12:06",
+        "15:43"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.46,
+      "tratti": [
+       [
+        "05:57",
+        "08:51"
+       ],
+       [
+        "11:50",
+        "15:42"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 207,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.15,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.15,
+      "tratti": [
+       [
+        "05:55",
+        "08:51"
+       ],
+       [
+        "12:00",
+        "15:19"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.41,
+      "tratti": [
+       [
+        "05:05",
+        "09:05"
+       ],
+       [
+        "12:00",
+        "14:41"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 209,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.12,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.12,
+      "tratti": [
+       [
+        "06:22",
+        "09:20"
+       ],
+       [
+        "11:56",
+        "15:10"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 210,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 7.1,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 7.1,
+      "tratti": [
+       [
+        "04:40",
+        "11:50"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.5,
+      "tratti": [
+       [
+        "05:05",
+        "11:55"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 211,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.29,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.29,
+      "tratti": [
+       [
+        "06:20",
+        "09:05"
+       ],
+       [
+        "12:05",
+        "15:49"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 5.57,
+      "tratti": [
+       [
+        "05:50",
+        "07:50"
+       ],
+       [
+        "12:00",
+        "15:57"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 212,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 6.58,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.58,
+      "tratti": [
+       [
+        "12:57",
+        "19:55"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 214,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 5.55,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 5.55,
+      "tratti": [
+       [
+        "06:28",
+        "09:30"
+       ],
+       [
+        "12:27",
+        "15:20"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.43,
+      "tratti": [
+       [
+        "06:07",
+        "09:57"
+       ],
+       [
+        "12:27",
+        "15:20"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 215,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 5.34,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 5.34,
+      "tratti": [
+       [
+        "06:38",
+        "12:12"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 216,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.03,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 7.03,
+      "tratti": [
+       [
+        "07:06",
+        "09:06"
+       ],
+       [
+        "13:32",
+        "18:35"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.03,
+      "tratti": [
+       [
+        "06:07",
+        "13:10"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 217,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.42,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.42,
+      "tratti": [
+       [
+        "05:50",
+        "09:17"
+       ],
+       [
+        "12:35",
+        "15:50"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 219,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.32,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.32,
+      "tratti": [
+       [
+        "05:00",
+        "09:06"
+       ],
+       [
+        "12:15",
+        "14:41"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.13,
+      "tratti": [
+       [
+        "05:28",
+        "09:09"
+       ],
+       [
+        "12:05",
+        "15:37"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 220,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 6.5,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.5,
+      "tratti": [
+       [
+        "05:05",
+        "11:55"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 221,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.39,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.39,
+      "tratti": [
+       [
+        "05:55",
+        "08:15"
+       ],
+       [
+        "11:46",
+        "16:05"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.12,
+      "tratti": [
+       [
+        "06:28",
+        "09:55"
+       ],
+       [
+        "12:05",
+        "15:50"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 222,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 5.27,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 5.27,
+      "tratti": [
+       [
+        "06:20",
+        "08:20"
+       ],
+       [
+        "11:43",
+        "15:10"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 223,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.25,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 7.25,
+      "tratti": [
+       [
+        "11:50",
+        "19:15"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 224,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.4,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.4,
+      "tratti": [
+       [
+        "06:07",
+        "09:05"
+       ],
+       [
+        "11:35",
+        "15:17"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.57,
+      "tratti": [
+       [
+        "06:20",
+        "09:35"
+       ],
+       [
+        "11:35",
+        "15:17"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    },
+    {
+     "n": 225,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 6.42,
+     "monta": "BOJON PK",
+     "lv": {
+      "ore": 6.42,
+      "tratti": [
+       [
+        "05:57",
+        "12:39"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.06,
+      "tratti": [
+       [
+        "06:33",
+        "12:39"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "bojon"
+    }
+   ]
+  },
+  {
+   "codice": "padova",
+   "nome": "Padova",
+   "sigla": "PD PARCH",
+   "fasce": [
+    [
+     301,
+     311
+    ],
+    [
+     350,
+     350
+    ]
+   ],
+   "disponibili": [
+    302,
+    304,
+    306,
+    310
+   ],
+   "turni": [
+    {
+     "n": 301,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.37,
+     "monta": "PD PARCH",
+     "lv": {
+      "ore": 6.37,
+      "tratti": [
+       [
+        "05:45",
+        "08:40"
+       ],
+       [
+        "12:00",
+        "15:42"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "padova"
+    },
+    {
+     "n": 303,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 5.38,
+     "monta": "PD PARCH",
+     "lv": {
+      "ore": 5.38,
+      "tratti": [
+       [
+        "05:20",
+        "08:29"
+       ],
+       [
+        "12:40",
+        "15:09"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.59,
+      "tratti": [
+       [
+        "05:20",
+        "08:29"
+       ],
+       [
+        "12:00",
+        "15:50"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 7.12,
+      "tratti": [
+       [
+        "10:13",
+        "17:25"
+       ]
+      ]
+     },
+     "deposito": "padova"
+    },
+    {
+     "n": 305,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.26,
+     "monta": "PD PARCH",
+     "lv": {
+      "ore": 7.26,
+      "tratti": [
+       [
+        "13:28",
+        "20:54"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.41,
+      "tratti": [
+       [
+        "14:13",
+        "20:54"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "padova"
+    },
+    {
+     "n": 307,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 7.34,
+     "monta": "PD PARCH",
+     "lv": {
+      "ore": 7.34,
+      "tratti": [
+       [
+        "04:45",
+        "12:19"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.34,
+      "tratti": [
+       [
+        "04:45",
+        "11:19"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.12,
+      "tratti": [
+       [
+        "05:13",
+        "11:25"
+       ]
+      ]
+     },
+     "deposito": "padova"
+    },
+    {
+     "n": 308,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 6.27,
+     "monta": "PD PARCH",
+     "lv": {
+      "ore": 6.27,
+      "tratti": [
+       [
+        "06:00",
+        "12:27"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.19,
+      "tratti": [
+       [
+        "06:00",
+        "12:19"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "padova"
+    },
+    {
+     "n": 309,
+     "cat": "SECONDO",
+     "origine": "lunven",
+     "ore": 7.11,
+     "monta": "PD PARCH",
+     "lv": {
+      "ore": 7.11,
+      "tratti": [
+       [
+        "12:28",
+        "19:39"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.51,
+      "tratti": [
+       [
+        "13:28",
+        "20:19"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "padova"
+    },
+    {
+     "n": 311,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 7.29,
+     "monta": "PD PARCH",
+     "lv": {
+      "ore": 7.29,
+      "tratti": [
+       [
+        "04:00",
+        "11:29"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.54,
+      "tratti": [
+       [
+        "04:00",
+        "10:54"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 6.12,
+      "tratti": [
+       [
+        "04:13",
+        "10:25"
+       ]
+      ]
+     },
+     "deposito": "padova"
+    },
+    {
+     "n": 350,
+     "cat": "TERZO",
+     "origine": "lunven",
+     "ore": 7.04,
+     "monta": "PD PARCH",
+     "lv": {
+      "ore": 7.04,
+      "tratti": [
+       [
+        "15:20",
+        "22:24"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 5.54,
+      "tratti": [
+       [
+        "16:30",
+        "22:24"
+       ]
+      ]
+     },
+     "fs": {
+      "ore": 5.17,
+      "tratti": [
+       [
+        "17:05",
+        "22:22"
+       ]
+      ]
+     },
+     "deposito": "padova"
+    }
+   ]
+  },
+  {
+   "codice": "fosso",
+   "nome": "Fossò",
+   "sigla": "FOSSO'PK / FOS PK B",
+   "fasce": [
+    [
+     501,
+     508
+    ]
+   ],
+   "disponibili": [
+    504
+   ],
+   "turni": [
+    {
+     "n": 501,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 7.13,
+     "monta": "FOSSO'PK",
+     "lv": {
+      "ore": 7.13,
+      "tratti": [
+       [
+        "07:02",
+        "09:08"
+       ],
+       [
+        "13:42",
+        "18:49"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.18,
+      "tratti": [
+       [
+        "06:20",
+        "08:20"
+       ],
+       [
+        "13:32",
+        "17:50"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "fosso"
+    },
+    {
+     "n": 502,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 7.29,
+     "monta": "FOS PK B",
+     "lv": {
+      "ore": 7.29,
+      "tratti": [
+       [
+        "05:35",
+        "13:04"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.16,
+      "tratti": [
+       [
+        "04:35",
+        "11:51"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "fosso"
+    },
+    {
+     "n": 503,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.23,
+     "monta": "FOSSO'PK",
+     "lv": {
+      "ore": 6.23,
+      "tratti": [
+       [
+        "05:10",
+        "08:22"
+       ],
+       [
+        "12:05",
+        "15:16"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.35,
+      "tratti": [
+       [
+        "05:55",
+        "09:28"
+       ],
+       [
+        "12:31",
+        "15:33"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "fosso"
+    },
+    {
+     "n": 505,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.12,
+     "monta": "FOSSO'PK",
+     "lv": {
+      "ore": 6.12,
+      "tratti": [
+       [
+        "05:59",
+        "09:33"
+       ],
+       [
+        "12:37",
+        "15:15"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.0,
+      "tratti": [
+       [
+        "05:57",
+        "08:16"
+       ],
+       [
+        "11:35",
+        "15:16"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "fosso"
+    },
+    {
+     "n": 506,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 5.27,
+     "monta": "FOSSO'PK",
+     "lv": {
+      "ore": 5.27,
+      "tratti": [
+       [
+        "05:57",
+        "08:15"
+       ],
+       [
+        "12:06",
+        "15:15"
+       ]
+      ]
+     },
+     "sb": null,
+     "fs": null,
+     "deposito": "fosso"
+    },
+    {
+     "n": 507,
+     "cat": "PRIMO",
+     "origine": "lunven",
+     "ore": 7.06,
+     "monta": "FOS PK B",
+     "lv": {
+      "ore": 7.06,
+      "tratti": [
+       [
+        "04:35",
+        "11:41"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 7.23,
+      "tratti": [
+       [
+        "06:00",
+        "13:23"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "fosso"
+    },
+    {
+     "n": 508,
+     "cat": "SPEZZATO",
+     "origine": "lunven",
+     "ore": 6.24,
+     "monta": "FOSSO'PK",
+     "lv": {
+      "ore": 6.24,
+      "tratti": [
+       [
+        "05:50",
+        "09:09"
+       ],
+       [
+        "12:00",
+        "15:05"
+       ]
+      ]
+     },
+     "sb": {
+      "ore": 6.34,
+      "tratti": [
+       [
+        "06:30",
+        "08:56"
+       ],
+       [
+        "11:50",
+        "15:58"
+       ]
+      ]
+     },
+     "fs": null,
+     "deposito": "fosso"
+    }
+   ]
+  }
+ ],
+ "jolly": [
+  {
+   "n": 901,
+   "cat": "RIDOTTO",
+   "origine": "lunven",
+   "ore": 2.05,
+   "monta": "DEP.DOLO",
+   "lv": {
+    "ore": 2.05,
+    "tratti": [
+     [
+      "06:35",
+      "08:40"
+     ]
+    ]
+   },
+   "sb": null,
+   "fs": null
+  },
+  {
+   "n": 902,
+   "cat": "RIDOTTO",
+   "origine": "lunven",
+   "ore": 2.15,
+   "monta": "DEP.DOLO",
+   "lv": {
+    "ore": 2.15,
+    "tratti": [
+     [
+      "06:50",
+      "09:05"
+     ]
+    ]
+   },
+   "sb": null,
+   "fs": null
+  },
+  {
+   "n": 904,
+   "cat": "RIDOTTO",
+   "origine": "lunven",
+   "ore": 2.0,
+   "monta": "DEP.DOLO",
+   "lv": {
+    "ore": 2.0,
+    "tratti": [
+     [
+      "06:35",
+      "08:35"
+     ]
+    ]
+   },
+   "sb": null,
+   "fs": null
+  }
+ ]
+}
+/*==DATI_FINE==*/
+</script>
+
+<script>
+"use strict";
+/* ------------------------------------------------------------------ dati */
+let DATI = (function(){
+  const grezzo = document.getElementById('dati').textContent;
+  const INI = '/*=' + '=DATI_INIZIO=' + '=*/', FIN = '/*=' + '=DATI_FINE=' + '=*/';
+  if(grezzo.includes(INI)) return JSON.parse(grezzo.split(INI)[1].split(FIN)[0]);
+  return JSON.parse(grezzo);
+})();
+
+const FASCIA = {PRIMO:'A',SPEZZATO:'A',SECONDO:'B',TERZO:'C',RIDOTTO:'N',DISP:'N'};
+const COD   = {PRIMO:'P',SPEZZATO:'SP',SECONDO:'S',TERZO:'T',RIDOTTO:'R',DISP:'D'};
+const COLOR = {PRIMO:'var(--primo)',SPEZZATO:'var(--spezzato)',SECONDO:'var(--secondo)',
+               TERZO:'var(--terzo)',RIDOTTO:'var(--ridotto)',DISP:'var(--disp)'};
+const PAUSA_MIN   = 600;   // 10 ore
+const PAUSA_DEROGA= 580;   // 9h40: si puo' tollerare con deroga
+
+let pesi = {ripetizione:100, stessaFascia:35, dopoSpezzato:60, inversione:18, salto:28,
+            ciclo:8, neutro:0, neutroNeutro:20, pausaForte:400, pausaDeroga:60, dispVicine:40};
+let sogliePerDep = {};      // codice deposito -> soglie
+let override = {};          // codice deposito -> {numero: categoria}
+let modoDisp = 'auto';      // 'auto' | 'sempre' | 'mai' (settimane disponibile)
+let depIdx = 0;
+let SLOTS=[], DISP_FISSI=new Set(), BY_NUM={};
+
+/* tra due turni disponibili devono passare almeno questo numero di turni normali */
+const DISP_MIN = 4;
+
+/* --------------------------------------------------------------- utility */
+function hm(m){ m=((m%1440)+1440)%1440; return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); }
+function aMinuti(s){ const p=s.split(':').map(Number); return p[0]*60+p[1]; }
+function oreMin(m){ return m==null || !isFinite(m) ? '—' : Math.floor(m/60)+'h '+String(Math.round(m%60)).padStart(2,'0'); }
+function dep(){ return DATI.depositi[depIdx]; }
+function soglie(){ return sogliePerDep[dep().codice]; }
+
+function trattiMin(v){
+  if(!v || !v.tratti || !v.tratti.length) return null;
+  return v.tratti.map(([a,b])=>{ const s=aMinuti(a); let e=aMinuti(b); if(e<=s) e+=1440; return [s,e]; });
+}
+/* minuti dall'inizio lunedi della settimana */
+function inizioServizio(v, giorno){ const t=trattiMin(v); return t ? giorno*1440 + t[0][0] : null; }
+function fineServizio(v, giorno){ const t=trattiMin(v); return t ? giorno*1440 + t[t.length-1][1] : null; }
+
+/* ultimo servizio della settimana: sabato (g.5) e, nelle settimane con festivo, domenica (g.6) */
+function ultimoServizio(t, conFestivo){
+  const v = [fineServizio(t.lv,4), fineServizio(t.sb,5)];
+  if(conFestivo) v.push(fineServizio(t.fs,6));
+  const n = v.filter(x=>x!=null);
+  return n.length ? Math.max(...n) : null;
+}
+/* primo servizio della settimana successiva (lunedì = giorno 7) */
+function primoServizioSucc(t){
+  const v = [inizioServizio(t.lv,7), inizioServizio(t.sb,12), inizioServizio(t.fs,13)]
+            .filter(x=>x!=null);
+  return v.length ? Math.min(...v) : null;
+}
+/* pausa minima garantita' tra la settimana X e la settimana successiva (Y).
+   Il risultato dipende solo dagli orari, quindi viene memorizzato: l'ottimizzatore
+   la richiede milioni di volte. */
+const _pausaCache = new Map();
+function pausaMin(tx, ty){
+  if(!tx || !ty) return Infinity;                  // settimane disponibile: turno scelto dall'ufficio
+  const chiave = tx.n + '>' + ty.n;
+  if(_pausaCache.has(chiave)) return _pausaCache.get(chiave);
+  let m = Infinity;
+  const p = primoServizioSucc(ty);
+  if(p!=null){
+    const a = ultimoServizio(tx,false), b = ultimoServizio(tx,true);
+    if(a!=null) m = Math.min(m, p-a);
+    if(b!=null) m = Math.min(m, p-b);
+  }
+  _pausaCache.set(chiave, m);
+  return m;
+}
+function costoPausa(p){
+  if(p >= PAUSA_MIN) return 0;
+  if(p >= PAUSA_DEROGA) return pesi.pausaDeroga;
+  return pesi.pausaForte;
+}
+
+/* ------------------------------------------------------- classificazione */
+function classifica(t, sg){
+  const tr = t.trattiLv || [];
+  if(tr.length===2) return 'SPEZZATO';
+  if(tr.length!==1) return null;
+  const ini = aMinuti(tr[0][0]); let fin = aMinuti(tr[0][1]);
+  if(fin<=ini) fin += 1440;
+  if((t.ore!=null ? t.ore : 99) < sg.ore_ridotto) return 'RIDOTTO';
+  if(ini < sg.fine_primo && fin <= sg.max_primo) return 'PRIMO';
+  if(ini >= sg.inizio_terzo || fin > sg.fine_terzo) return 'TERZO';
+  return 'SECONDO';
+}
+function catDi(t){ return (override[dep().codice]||{})[t.n] || t._catAuto || 'DISP'; }
+
+function prepara(){
+  DATI.depositi.forEach(d=>{
+    const sg = sogliePerDep[d.codice];
+    d.turni.forEach(t=>{
+      t.trattiLv = t.lv ? t.lv.tratti : (t.sb ? t.sb.tratti : (t.fs ? t.fs.tratti : []));
+      t._catAuto = classifica(t, sg);
+    });
+  });
+}
+function ricostruisciIndici(){
+  const d = dep();
+  SLOTS = [];
+  (d.fasce||[]).forEach(([a,b])=>{ for(let n=a;n<=b;n++) SLOTS.push(n); });
+  DISP_FISSI = new Set(d.disponibili||[]);
+  BY_NUM = {};
+  d.turni.forEach(t=>{ BY_NUM[t.n] = t; });
+}
+
+/* i numeri disponibile restano fissi se la numerazione attuale li distribuisce
+   gia' secondo la regola (modo 'auto'): si muovono solo dove non e' rispettata */
+function dispFissiAttivi(){
+  if(modoDisp==='sempre') return true;
+  if(modoDisp==='mai') return false;
+  return dep()._dispOk !== false;
+}
+/* vuoti (turni normali) tra un disponibile e il successivo, sulla numerazione attuale */
+function gapNumerazione(d){
+  const slots=[]; (d.fasce||[]).forEach(([a,b])=>{ for(let n=a;n<=b;n++) slots.push(n); });
+  const set=new Set(d.disponibili||[]);
+  const idx=[]; slots.forEach((n,i)=>{ if(set.has(n)) idx.push(i); });
+  return idx.map((p,k)=>{ const q=idx[(k+1)%idx.length]; return ((q-p-1)+slots.length)%slots.length; });
+}
+
+/* ----------------------------------------------------------------- pesi */
+function costo(a,b){
+  if(a===b) return a==='DISP' ? pesi.neutroNeutro : pesi.ripetizione;
+  const fa=FASCIA[a], fb=FASCIA[b];
+  if(fa==='N'||fb==='N') return pesi.neutro;
+  if(a==='SPEZZATO'&&b==='PRIMO') return pesi.dopoSpezzato;   // niente mattina dopo uno spezzato
+  if(fa==='A'&&fb==='A') return pesi.stessaFascia;
+  if(fa==='A'&&fb==='B') return 0;
+  if(fa==='B'&&fb==='C') return 0;
+  if(fa==='C'&&fb==='A') return pesi.ciclo;
+  if(fa==='B'&&fb==='A') return pesi.inversione;
+  if(fa==='C'&&fb==='B') return pesi.inversione;
+  if(fa==='A'&&fb==='C') return pesi.salto;
+  return 0;
+}
+function costoVoce(x,y){
+  let c = costo(x.cat, y.cat);
+  if(x.n!=null && y.n!=null) c += costoPausa(pausaMin(BY_NUM[x.n], BY_NUM[y.n]));
+  return c;
+}
+function punteggio(seq){
+  let tot=0;
+  for(let i=0;i<seq.length;i++) tot += costoVoce(seq[i], seq[(i+1)%seq.length]);
+  return tot + costoDisp(seq);
+}
+/* vincolo di distanza fra i disponibili: se fra due turni disponibile ci sono
+   meno di DISP_MIN turni normali costa la differenza per il peso dedicato */
+function costoDisp(seq){
+  const w = pesi.dispVicine;
+  if(!w || !seq.length) return 0;
+  const L=seq.length, idx=[];
+  for(let i=0;i<L;i++) if(seq[i].cat==='DISP') idx.push(i);
+  if(idx.length<2) return 0;
+  let tot=0;
+  for(let k=0;k<idx.length;k++){
+    const p=idx[k], q=idx[(k+1)%idx.length];
+    const gap=((q-p-1)+L)%L;
+    if(gap<DISP_MIN) tot += (DISP_MIN-gap)*w;
+  }
+  return tot;
+}
+/* turni normali che precedono il disponibile in posizione i */
+function gapPrimaDisp(seq,i){
+  const L=seq.length; let c=0;
+  for(let k=(i-1+L)%L; ; k=(k-1+L)%L){
+    if(seq[k].cat==='DISP') return c;
+    if(++c>=L) return c;
+    if(k===i) return c;
+  }
+}
+function costoPosizione(seq,i){
+  const L=seq.length;
+  return costoVoce(seq[(i-1+L)%L], seq[i]) + costoVoce(seq[i], seq[(i+1)%L]);
+}
+
+/* ------------------------------------------------------- sequenza attuale */
+function seqOriginale(){
+  return SLOTS.map(n => (DISP_FISSI.has(n) || !BY_NUM[n])
+      ? {n:null, cat:'DISP'} : {n:n, cat:catDi(BY_NUM[n])});
+}
+
+/* ------------------------------------------------------------- ottimizza */
+function costruisci(shift){
+  const seq = new Array(SLOTS.length).fill(null);
+  const liberi = [];
+  SLOTS.forEach((n,i)=>{
+    if(dispFissiAttivi() && DISP_FISSI.has(n)) seq[i] = {n:null, cat:'DISP'};
+    else liberi.push(i);
+  });
+  const q = {PRIMO:0, SPEZZATO:0, SECONDO:0, TERZO:0,
+             DISP: dispFissiAttivi() ? 0 : (DISP_FISSI.size)};
+  dep().turni.forEach(t=>{ const c=catDi(t); q[c]=(q[c]||0)+1; });
+
+  /* le fasce A (mattina/spezzato) B (secondo) C (terzo) distese regolarmente */
+  const bq = {A:q.PRIMO+q.SPEZZATO, B:q.SECONDO, C:q.TERZO, N:q.DISP};
+  const voci = [];
+  ['A','B','C','N'].forEach(b=>{
+    const n=bq[b]; if(!n) return;
+    for(let k=0;k<n;k++) voci.push({b, pos:((k+0.5)/n + shift)%1});
+  });
+  voci.sort((x,y)=>x.pos-y.pos);
+
+  /* scelta della categoria: mattina e spezzato si alternano, mai spezzato->primo */
+  let lastA=null, lastN=null; const catSeq=[];
+  voci.forEach(v=>{
+    let c;
+    if(v.b==='A'){
+      if(lastA===null) c = q.PRIMO>=q.SPEZZATO ? 'PRIMO' : 'SPEZZATO';
+      else if(lastA==='PRIMO') c = 'SPEZZATO';
+      else c = (q.PRIMO>0 && (q.PRIMO*2 >= q.SPEZZATO)) ? 'PRIMO' : 'SPEZZATO';
+      if(q[c]===0) c = q.PRIMO>0 ? 'PRIMO' : 'SPEZZATO';
+      lastA=c; lastN=null;
+    } else if(v.b==='B'){ c='SECONDO'; lastA=null; lastN=null; }
+    else if(v.b==='C'){ c='TERZO'; lastA=null; lastN=null; }
+    else {
+      c = (lastN==='DISP' || q.DISP===0) ? 'RIDOTTO' : 'DISP';
+      if(q[c]===0) c = c==='DISP' ? 'RIDOTTO' : 'DISP';
+      if(q[c]===0) c = 'DISP';
+      lastN=c; lastA=null;
+    }
+    if(q[c]!=null) q[c]--;
+    catSeq.push(c);
+  });
+
+  const coda = {};
+  dep().turni.forEach(t=>{ const c=catDi(t); (coda[c]=coda[c]||[]).push(t); });
+  Object.values(coda).forEach(a=>a.sort((x,y)=>x.n-y.n));
+  catSeq.forEach((c,k)=>{
+    const i = liberi[k];
+    if(i===undefined) return;
+    seq[i] = (c==='DISP') ? {n:null, cat:'DISP'} : {n:coda[c].shift().n, cat:c};
+  });
+  return seq;
+}
+
+function anneal(seq){
+  const L=seq.length;
+  const pos=[];
+  SLOTS.forEach((n,i)=>{ if(!(dispFissiAttivi() && DISP_FISSI.has(n))) pos.push(i); });
+  const affetta=(i,j)=>[...new Set([(i-1+L)%L,i,(i+1)%L,(j-1+L)%L,j,(j+1)%L])];
+  let cur=punteggio(seq), best=cur, bestSeq=seq.slice();
+  const PASSI=Math.max(3000, Math.min(30000, L*600)), T0=40, T1=0.4;
+  for(let s=0;s<PASSI;s++){
+    const T = T0*Math.pow(T1/T0, s/PASSI);
+    const i=pos[(Math.random()*pos.length)|0], j=pos[(Math.random()*pos.length)|0];
+    if(i===j) continue;
+    const idx=affetta(i,j);
+    const a=seq[i], b=seq[j];
+    const tocDisp = (a.cat==='DISP' || b.cat==='DISP');   // il vincolo di distanza e' globale
+    let prima=0; for(const k of idx) prima+=costoPosizione(seq,k);
+    const dispPrima = tocDisp ? costoDisp(seq) : 0;
+    seq[i]=b; seq[j]=a;
+    let dopo=0; for(const k of idx) dopo+=costoPosizione(seq,k);
+    const d=(dopo-prima)/2 + (tocDisp ? costoDisp(seq)-dispPrima : 0);   // ogni arco e' contato due volte
+    if(d<0 || Math.random()<Math.exp(-d/T)){
+      cur+=d;
+      if(cur<best-1e-9){ best=cur; bestSeq=seq.slice(); }
+    } else { seq[i]=a; seq[j]=b; }
+  }
+  bestSeq.forEach((v,i)=>{ seq[i]=v; });
+  return best;
+}
+
+function migliora(seq){
+  const L=seq.length;
+  const affetta=(i,j)=>[...new Set([(i-1+L)%L,i,(i+1)%L,(j-1+L)%L,j,(j+1)%L])];
+  let tot=punteggio(seq), fatto=true, giri=0;
+  while(fatto && giri<15){
+    fatto=false; giri++;
+    for(let i=0;i<L;i++){
+      for(let j=i+1;j<L;j++){
+        if(dispFissiAttivi() && (seq[i].cat==='DISP' || seq[j].cat==='DISP')) continue;
+        if(seq[i].cat===seq[j].cat && seq[i].n===seq[j].n) continue;
+        const idx=affetta(i,j);
+        const a=seq[i], b=seq[j];
+        const tocDisp = (a.cat==='DISP' || b.cat==='DISP');
+        let prima=0; for(const k of idx) prima+=costoPosizione(seq,k);
+        const dispPrima = tocDisp ? costoDisp(seq) : 0;
+        seq[i]=b; seq[j]=a;
+        let dopo=0; for(const k of idx) dopo+=costoPosizione(seq,k);
+        const delta=(dopo-prima)/2 + (tocDisp ? costoDisp(seq)-dispPrima : 0);
+        if(delta<-1e-9){ tot+=delta; fatto=true; }
+        else { seq[i]=a; seq[j]=b; }
+      }
+    }
+  }
+  return {seq, punteggio:tot};
+}
+
+/* il riposo di 10 ore e' una regola, non una preferenza: prima si minimizzano
+   le pause sotto 9h40, poi quelle sotto 10h, e solo dopo il punteggio */
+function ottimizzaIndice(k){
+  const salvato = depIdx; depIdx = k; ricostruisciIndici();
+  const candidati=[];
+  for(let s=0;s<8;s++){
+    const seq = costruisci(s/8);
+    anneal(seq);
+    const c = migliora(seq);
+    c._st = statistiche(c.seq);
+    candidati.push(c);
+  }
+  candidati.sort((a,b)=> (a._st.pauseKO-b._st.pauseKO) || (a._st.pauseDer-b._st.pauseDer) ||
+                         (a._st.punteggio-b._st.punteggio));
+  DATI.depositi[k]._seq = candidati[0].seq;
+  depIdx = salvato; ricostruisciIndici();
+}
+function ottimizza(tutti){
+  if(tutti) DATI.depositi.forEach((d,k)=>ottimizzaIndice(k));
+  else ottimizzaIndice(depIdx);
+  disegnaTutto();
+  document.getElementById('strip').scrollIntoView({behavior:'smooth', block:'center'});
+}
+function azzera(){ DATI.depositi[depIdx]._seq = null; disegnaTutto(); }
+function sequenza(){ return DATI.depositi[depIdx]._seq || seqOriginale(); }
+
+/* ---------------------------------------------------------------- stats */
+function statistiche(seq){
+  const rip=[], conteggi={};
+  let stesseFascia=0, dopoSpezzato=0, inversioni=0, salti=0, cicli=0, neutre=0;
+  let pauseKO=0, pauseDer=0;
+  let maxCat=1, runCat=1;
+  conteggi[seq[0].cat]=1;
+  for(let i=1;i<=seq.length;i++){
+    const cur=seq[i%seq.length], prec=seq[(i-1)%seq.length];
+    const c=cur.cat, p=prec.cat, f=FASCIA[c], pf=FASCIA[p];
+    if(c===p){ if(f==='N') neutre++; else rip.push(i+1); }
+    else if(p==='SPEZZATO' && c==='PRIMO') dopoSpezzato++;
+    else if(f==='A'&&pf==='A') stesseFascia++;
+    else if(pf==='B'&&f==='A') inversioni++;
+    else if(pf==='C'&&f==='B') inversioni++;
+    else if(pf==='A'&&f==='C') salti++;
+    else if(pf==='C'&&f==='A') cicli++;
+    else if(f==='N'||pf==='N') neutre++;
+    if(cur.n!=null && prec.n!=null){
+      const pmin = pausaMin(BY_NUM[prec.n], BY_NUM[cur.n]);
+      if(pmin < PAUSA_DEROGA) pauseKO++;
+      else if(pmin < PAUSA_MIN) pauseDer++;
+    }
+    if(i<seq.length){
+      conteggi[c]=(conteggi[c]||0)+1;
+      if(c===p) runCat++; else { maxCat=Math.max(maxCat,runCat); runCat=1; }
+    }
+  }
+  maxCat=Math.max(maxCat,runCat);
+  /* turni normali fra un disponibile e il successivo */
+  const idxDisp=[];
+  for(let i=0;i<seq.length;i++) if(seq[i].cat==='DISP') idxDisp.push(i);
+  let minGap=null, dispVicine=0;
+  if(idxDisp.length){
+    minGap=Infinity;
+    for(let k=0;k<idxDisp.length;k++){
+      const p=idxDisp[k], q=idxDisp[(k+1)%idxDisp.length];
+      const gap=((q-p-1)+seq.length)%seq.length;
+      if(gap<minGap) minGap=gap;
+      if(gap<DISP_MIN) dispVicine++;
+    }
+    if(!isFinite(minGap)) minGap=null;
+  }
+  return {ripetizioni:rip.length, stesseFascia, dopoSpezzato, inversioni, salti, cicli, neutre,
+          pauseKO, pauseDer, maxCat, minGapDisp:minGap, dispVicine, conteggi,
+          punteggio:punteggio(seq), serie:rip};
+}
+
+/* --------------------------------------------------------------- disegno */
+function fmtTratti(v){ return v && v.tratti.length ? v.tratti.map(t=>t[0]+'-'+t[1]).join(' + ') : '—'; }
+function tagCat(c){ return `<span class="tag" style="background:${COLOR[c]};${c==='DISP'?'color:#334155':''}">${c}</span>`; }
+
+function disegnaRiepilogo(){
+  const el = document.getElementById('riepilogo');
+  el.innerHTML = DATI.depositi.map((d,k)=>{
+    const c={}; d.turni.forEach(t=>{ c[t._catAuto]=(c[t._catAuto]||0)+1; });
+    const pos = d.fasce.reduce((s,[a,b])=>s+(b-a+1),0);
+    return `<div class="card ${k===depIdx?'sel':''}" style="cursor:pointer" onclick="scegliDep(${k})">
+      <div class="val">${d.turni.length}</div>
+      <div class="lbl"><b>${d.nome}</b><br>${pos} posizioni · ${d.disponibili.length} disponibili${d._dispOk===false?' <span class="ko-txt">⚠ regola 4 turni</span>':''}<br>
+      P ${c.PRIMO||0} · SP ${c.SPEZZATO||0} · S ${c.SECONDO||0} · T ${c.TERZO||0}</div></div>`;
+  }).join('') +
+  `<div class="card"><div class="val">${(DATI.jolly||[]).length}</div>
+    <div class="lbl">Jolly (ridotti)<br>fuori dalla turnazione</div></div>`;
+  document.getElementById('infoDati').textContent =
+    `Dati generati il ${DATI.generato||'?'} da: ${(DATI.sorgenti||[]).join(', ')}`;
+  document.getElementById('tabs').innerHTML = DATI.depositi.map((d,k)=>
+    `<button class="${k===depIdx?'attivo':''}" onclick="scegliDep(${k})">${d.nome}</button>`).join('');
+  ['titoloDep','titoloDep2','titoloDep3'].forEach(id=>{
+    const e=document.getElementById(id); if(e) e.textContent = '· ' + dep().nome;
+  });
+}
+
+function disegnaStats(){
+  const seq = sequenza();
+  const att = statistiche(seqOriginale());
+  const nuo = DATI.depositi[depIdx]._seq ? statistiche(seq) : null;
+  const riga = (titolo,k,inverso)=>{
+    const a=att[k];
+    let extra='';
+    if(nuo){ const b=nuo[k];
+      const num = (typeof a==='number' && typeof b==='number');
+      const cls = num ? ((inverso ? b>a : b<a) ? 'migliora' : ((inverso ? b<a : b>a) ? 'peggiora' : '')) : '';
+      extra = ` <small class="${cls}">→ ${b==null?'—':b}</small>`; }
+    return `<div class="stat"><b>${a==null?'—':a}${extra}</b><span class="lbl">${titolo}</span></div>`;
+  };
+  document.getElementById('stats').innerHTML =
+    riga('Ripetizioni della stessa categoria','ripetizioni')+
+    riga('Spezzato poi primo','dopoSpezzato')+
+    riga('Primo poi spezzato','stesseFascia')+
+    riga('Inversioni','inversioni')+
+    riga('Serie max uguale','maxCat')+
+    riga('Min turni prima di un disponibile','minGapDisp',true)+
+    riga('Disponibili con meno di 4 turni prima','dispVicine')+
+    riga('Pause sotto 9h40','pauseKO')+
+    riga('Pause 9h40–10h','pauseDer')+
+    riga('Punteggio (più basso = meglio)','punteggio');
+}
+
+function disegnaStrip(seq){
+  document.getElementById('strip').innerHTML = seq.map((v,i)=>{
+    const num = v.n===null ? 'DISP' : v.n;
+    const cls = v.cat==='DISP' ? 'blk disp' : 'blk '+v.cat;
+    const t = v.n!==null ? BY_NUM[v.n] : null;
+    const tit = `posizione ${SLOTS[i]} → ${v.cat}` + (t? ` (${fmtTratti(t.lv)||fmtTratti(t.sb)})` : '');
+    return `<div class="${cls}" title="${tit}">${COD[v.cat]}<small style="position:absolute;bottom:-2px;right:2px;font-size:7px">${num}</small></div>`;
+  }).join('');
+}
+
+function disegnaTabSeq(seq){
+  const tb = document.querySelector('#tabSeq tbody');
+  tb.innerHTML = seq.map((v,i)=>{
+    if(v.n===null){
+      const g = gapPrimaDisp(seq,i), ok = g>=DISP_MIN;
+      return `<tr><td><b>${SLOTS[i]}</b></td><td>—</td><td>${tagCat('DISP')}</td><td>—</td>
+        <td colspan="4">turno non predeterminato: lo assegna l’ufficio in base alle esigenze
+        · <b class="${ok?'':'ko-txt'}">${g} turni normali prima${ok?'':' (mancano '+(DISP_MIN-g)+')'}</b></td></tr>`;
+    }
+    const t = BY_NUM[v.n];
+    /* pausa garantita' verso il turno della settimana successiva */
+    const j = (i+1)%seq.length, yn = seq[j].n;
+    const p = yn!=null ? pausaMin(t, BY_NUM[yn]) : Infinity;
+    const clsP = p<PAUSA_DEROGA ? 'ko-txt' : (p<PAUSA_MIN ? 'der-txt' : '');
+    const txtP = isFinite(p) ? `<span class="${clsP}">${oreMin(p)}</span>` : '— (disponibile)';
+    return `<tr><td><b>${SLOTS[i]}</b></td><td>D${String(v.n).padStart(3,'0')}</td>
+      <td>${tagCat(v.cat)}</td><td>${txtP}</td>
+      <td>${fmtTratti(t.lv)}</td><td>${fmtTratti(t.sb)}</td><td>${fmtTratti(t.fs)}</td>
+      <td>${t.ore!=null? String(t.ore).replace('.',',')+' h' : '—'}</td></tr>`;
+  }).join('');
+}
+
+function disegnaSimulazione(){
+  const seq = sequenza();
+  const partenza = Math.max(1, Math.min(SLOTS.length, +document.getElementById('sim_partenza').value||1));
+  const sett = +document.getElementById('sim_settimane').value;
+  const i0 = Math.max(0, SLOTS.indexOf(partenza));
+  const cal=[], tb=document.querySelector('#tabSim tbody');
+  let righe='', precedente=null;
+  for(let k=0;k<sett;k++){
+    const i=(i0+k)%seq.length, v=seq[i], slot=SLOTS[i];
+    const t = v.n!==null ? BY_NUM[v.n] : null;
+    const orario = t? (fmtTratti(t.lv)!=='—'? fmtTratti(t.lv) : (fmtTratti(t.sb)!=='—'? 'Sabato: '+fmtTratti(t.sb) : '—')) : '—';
+    let pmin = Infinity, clsC='', clsP='';
+    if(precedente && t){ pmin = pausaMin(precedente, t);
+      clsP = pmin<PAUSA_DEROGA ? 'ko-txt' : (pmin<PAUSA_MIN ? 'der-txt' : '');
+      clsC = pmin<PAUSA_DEROGA ? 'ko' : (pmin<PAUSA_MIN ? 'der' : '');
+    }
+    const nota = v.cat==='DISP' ? 'turno da assegnare (ufficio)'
+               : (t && !t.lv ? 'cartellino solo '+({'sabato':'sabato','festivo':'festivo'}[t.origine]||'altro') : '');
+    cal.push(`<div class="c ${v.cat==='DISP'?'':v.cat} ${clsC}" style="${v.cat==='DISP'?'background:var(--disp);color:#334155':''}">
+        <b>${k+1}ª</b><br>n°${slot}<br>${COD[v.cat]}</div>`);
+    righe += `<tr><td>${k+1}</td><td><b>${slot}</b></td><td>${tagCat(v.cat)}</td>
+      <td>${v.n!==null?'D'+String(v.n).padStart(3,'0'):'—'}</td><td>${orario}</td>
+      <td class="${clsP}">${isFinite(pmin)&&precedente?oreMin(pmin):'—'}</td><td>${nota}</td></tr>`;
+    precedente = t;   /* nella disponibile il turno lo sceglie l'ufficio: la pausa non e' verificabile */
+  }
+  document.getElementById('calendario').innerHTML = cal.join('');
+  tb.innerHTML = righe;
+}
+
+function pauseInterne(t){
+  const out=[];
+  const fLv=fineServizio(t.lv,4), iSb=inizioServizio(t.sb,5);
+  const fSb=fineServizio(t.sb,5), iFs=inizioServizio(t.fs,6);
+  if(fLv!=null && iSb!=null && iSb-fLv < 720){
+    const ult = trattiMin(t.lv).slice(-1)[0];
+    out.push({etichetta:'lun-ven → sabato', minuti:iSb-fLv,
+              prima:'lun-ven fino alle '+(ult?hm(ult[1]):''), dopo:'sabato dalle '+hm(iSb%1440)});
+  }
+  if(fSb!=null && iFs!=null && iFs-fSb < 720){
+    const ult = trattiMin(t.sb).slice(-1)[0];
+    out.push({etichetta:'sabato → festivo', minuti:iFs-fSb,
+              prima:'sabato fino alle '+(ult?hm(ult[1]):''), dopo:'festivo dalle '+hm(iFs%1440)});
+  }
+  return out;
+}
+
+function disegnaTurni(){
+  const q = document.getElementById('f_ricerca').value.trim().toLowerCase();
+  const f = document.getElementById('f_cat').value;
+  const lista = dep().turni.slice().sort((a,b)=>a.n-b.n);
+  const righe = lista.filter(t=>{
+      if(f && catDi(t)!==f) return false;
+      if(!q) return true;
+      const s=[t.n, catDi(t), fmtTratti(t.lv), fmtTratti(t.sb), fmtTratti(t.fs), t.ore].join(' ').toLowerCase();
+      return s.includes(q);
+    }).map(t=>{
+      const pi = pauseInterne(t);
+      const pa = pi.length ? pi.map(x=>`<span class="${x.minuti<PAUSA_DEROGA?'ko-txt':(x.minuti<PAUSA_MIN?'der-txt':'')}">${x.etichetta} ${oreMin(x.minuti)}</span>`).join('<br>') : '—';
+      return `<tr><td><b>D${String(t.n).padStart(3,'0')}</b></td>
+      <td class="mie" onclick="cambiaCat(${t.n})" title="clicca per cambiare">${tagCat(catDi(t))}</td>
+      <td>${fmtTratti(t.lv)}</td><td>${fmtTratti(t.sb)}</td><td>${fmtTratti(t.fs)}</td>
+      <td>${pa}</td>
+      <td>${t.ore!=null? String(t.ore).replace('.',',')+' h':'—'}</td>
+      <td>${(override[dep().codice]&&override[dep().codice][t.n])?'categoria forzata a mano':''}${t.nota? ' · '+t.nota:''}</td></tr>`;
+    }).join('');
+  document.querySelector('#tabTurni tbody').innerHTML = righe ||
+    '<tr><td colspan="8" style="color:var(--muted)">nessun risultato</td></tr>';
+  document.getElementById('tabJolly').querySelector('tbody').innerHTML =
+    (DATI.jolly||[]).map(t=>`<tr><td><b>D${String(t.n).padStart(3,'0')}</b></td>
+      <td>${fmtTratti(t.lv)}</td><td>${fmtTratti(t.sb)}</td><td>${fmtTratti(t.fs)}</td>
+      <td>${t.ore!=null? String(t.ore).replace('.',',')+' h':'—'}</td></tr>`).join('');
+  const pmin = [];
+  dep().turni.forEach(t=>pauseInterne(t).forEach(x=>pmin.push([t,x])));
+  document.querySelector('#tabPause tbody').innerHTML = pmin.length
+    ? pmin.map(([t,x])=>`<tr><td><b>D${String(t.n).padStart(3,'0')}</b></td><td>${x.etichetta}</td>
+        <td>${x.prima}</td><td>${x.dopo}</td>
+        <td class="${x.minuti<PAUSA_DEROGA?'ko-txt':'der-txt'}">${oreMin(x.minuti)}${x.minuti<PAUSA_DEROGA?' (sotto 9h40)':''}</td></tr>`).join('')
+    : '<tr><td colspan="5" style="color:var(--muted)">nessuna pausa interna sotto le 12 ore</td></tr>';
+}
+
+function cambiaCat(n){
+  const ordine=['PRIMO','SPEZZATO','SECONDO','TERZO'];
+  const cod=dep().codice;
+  override[cod]=override[cod]||{};
+  const cur=catDi(BY_NUM[n]);
+  const i=ordine.indexOf(cur);
+  if(i<0){ override[cod][n]='PRIMO'; }
+  else { override[cod][n]=ordine[(i+1)%ordine.length]; }   // ruota e torna alla partenza
+  DATI.depositi[depIdx]._seq=null; prepara(); disegnaTutto();
+}
+
+function disegnaTutto(){
+  ricostruisciIndici();
+  disegnaRiepilogo(); disegnaStats();
+  disegnaStrip(sequenza()); disegnaTabSeq(sequenza());
+  disegnaSimulazione(); disegnaTurni();
+  document.getElementById('notaSeq').textContent = DATI.depositi[depIdx]._seq
+    ? `Proposta per ${dep().nome}: i ${dep().turni.length} turni sono stati riassegnati alle ${SLOTS.length} posizioni. `+
+      `Chi è alla posizione n° x questa settimana passa alla n° x+1 la settimana dopo (poi si ricomincia dal n° 1).`
+    : `Stai vedendo la numerazione attuale di ${dep().nome}. Premi “Calcola questo deposito” per la proposta ottimizzata.`;
+  /* regola dei 4 turni impossibile da rispettare in questo deposito */
+  const d=dep(), nDisp=d.disponibili.length, servono=DISP_MIN*nDisp;
+  let msg='';
+  if(nDisp && servono > d.turni.length){
+    const medio=Math.floor(d.turni.length/nDisp);
+    msg = `Impossibile rispettare la regola in ${d.nome}: con ${nDisp} settimane disponibile servirebbero `+
+          `${DISP_MIN}×${nDisp}=${servono} turni normali, ma i turni sono ${d.turni.length}. `+
+          `Il massimo realizzabile è ${medio} turni normali fra un disponibile e l’attivale.`;
+  }
+  document.getElementById('msgDisp').textContent = msg;
+}
+
+/* ---------------------------------------------------------------- export */
+function scaricaCSV(){
+  const righe=[['Deposito','NuovoNumero','TurnoAttuale','Categoria','PausaVersoIlSeguente','LunVen','Sabato','Festivo','Ore']];
+  DATI.depositi.forEach((d,k)=>{
+    const seq = d._seq || (()=>{ const s=depIdx; depIdx=k; const o=seqOriginale(); depIdx=s; return o; })();
+    const slots=[]; (d.fasce||[]).forEach(([a,b])=>{ for(let n=a;n<=b;n++) slots.push(n); });
+    const by={}; d.turni.forEach(t=>by[t.n]=t);
+    seq.forEach((v,i)=>{
+      if(v.n===null){ righe.push([d.nome, slots[i], '', 'DISPONIBILE', '', '', '', '', '']); return; }
+      const t=by[v.n], j=(i+1)%seq.length, yn=seq[j].n;
+      const p = yn!=null ? pausaMin(t, by[yn]) : Infinity;
+      righe.push([d.nome, slots[i], 'D'+String(v.n).padStart(3,'0'), v.cat,
+        isFinite(p)?oreMin(p):'', fmtTratti(t.lv), fmtTratti(t.sb), fmtTratti(t.fs), t.ore??'']);
+    });
+  });
+  const csv='\uFEFF'+righe.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='proposta_numerazione_turni.csv'; a.click();
+}
+
+/* ------------------------------------------------------------------ init */
+function scegliDep(k){ depIdx=k; ricostruisciIndici(); disegnaTutto(); initInput(); }
+function applicaSoglie(){
+  const sg = soglie();
+  sg.ore_ridotto  = +document.getElementById('s_ridotto').value;
+  sg.fine_primo   = aMinuti(document.getElementById('s_fineprimo').value);
+  sg.max_primo    = aMinuti(document.getElementById('s_maxprimo').value);
+  sg.inizio_terzo = aMinuti(document.getElementById('s_inizioterzo').value);
+  sg.fine_terzo   = aMinuti(document.getElementById('s_fineterzo').value);
+  DATI.depositi[depIdx]._seq=null; prepara(); disegnaTutto();
+}
+function copiaSoglieATutti(){
+  applicaSoglie();
+  const sg = Object.assign({}, soglie());
+  DATI.depositi.forEach(d=>{ sogliePerDep[d.codice]=Object.assign({},sg); });
+  DATI.depositi.forEach(d=>{ d._seq=null; });
+  prepara(); disegnaTutto();
+}
+function caricaPesi(){
+  pesi.ripetizione   = +document.getElementById('p_rip').value;
+  pesi.stessaFascia  = +document.getElementById('p_fascia').value;
+  pesi.dopoSpezzato  = +document.getElementById('p_spezzmat').value;
+  pesi.inversione    = +document.getElementById('p_inv').value;
+  pesi.salto         = +document.getElementById('p_salto').value;
+  pesi.ciclo         = +document.getElementById('p_ciclo').value;
+  pesi.dispVicine    = +document.getElementById('p_disp').value;
+  pesi.pausaForte    = +document.getElementById('p_pausako').value;
+  pesi.pausaDeroga   = +document.getElementById('p_pausader').value;
+  modoDisp           = document.getElementById('sel_disp').value;
+}
+function initInput(){
+  const sg = soglie();
+  document.getElementById('s_ridotto').value  = sg.ore_ridotto;
+  document.getElementById('s_fineprimo').value = hm(sg.fine_primo);
+  document.getElementById('s_maxprimo').value  = hm(sg.max_primo);
+  document.getElementById('s_inizioterzo').value = hm(sg.inizio_terzo);
+  document.getElementById('s_fineterzo').value = hm(sg.fine_terzo);
+}
+['p_rip','p_fascia','p_spezzmat','p_inv','p_salto','p_ciclo','p_disp','p_pausako','p_pausader','sel_disp']
+  .forEach(id=>document.getElementById(id).addEventListener('change', ()=>{
+    caricaPesi(); DATI.depositi.forEach(d=>{ d._seq=null; }); disegnaTutto(); }));
+
+DATI.depositi.forEach(d=>{
+  sogliePerDep[d.codice] = Object.assign({}, DATI.soglie);
+  /* la numerazione attuale rispetta gia' la regola dei 4 turni? (modo automatico) */
+  d._gapOrig = gapNumerazione(d);
+  d._dispOk  = d._gapOrig.every(x=>x>=DISP_MIN);
+});
+document.getElementById('p_rip').value=pesi.ripetizione;
+document.getElementById('p_fascia').value=pesi.stessaFascia;
+document.getElementById('p_spezzmat').value=pesi.dopoSpezzato;
+document.getElementById('p_inv').value=pesi.inversione;
+document.getElementById('p_salto').value=pesi.salto;
+document.getElementById('p_ciclo').value=pesi.ciclo;
+document.getElementById('p_disp').value=pesi.dispVicine;
+document.getElementById('p_pausako').value=pesi.pausaForte;
+document.getElementById('p_pausader').value=pesi.pausaDeroga;
+document.getElementById('sel_disp').value=modoDisp;
+prepara(); ricostruisciIndici(); initInput(); disegnaTutto();
+</script>
+</body>
+</html>
